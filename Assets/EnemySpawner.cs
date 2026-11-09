@@ -5,9 +5,10 @@ public class EnemySpawner : MonoBehaviour
 {
     public GameObject enemyPrefab;
 
-    [Header("Oleada")]
-    public int enemiesToSpawn = 5;          // Cuántos enemigos aparecen en total en esta sala
-    public float spawnInterval = 2f;        // Segundos entre enemigo y enemigo
+    [Header("Oleada aleatoria")]
+    public int minEnemies = 3;               // Mínimo de enemigos de la oleada
+    public int maxEnemies = 7;               // Máximo de enemigos de la oleada (incluido)
+    public float spawnInterval = 0.5f;       // Segundos entre enemigo y enemigo
     public float minDistanceFromPlayer = 3f; // Para que no aparezcan encima del jugador
 
     [Header("Área de aparición (RELATIVA a la posición de este objeto)")]
@@ -18,6 +19,7 @@ public class EnemySpawner : MonoBehaviour
     public event System.Action AllEnemiesDefeated;
 
     private readonly List<GameObject> spawned = new List<GameObject>();
+    private int enemiesToSpawn;
     private int spawnedCount;
     private float timer;
     private bool finished;
@@ -25,6 +27,11 @@ public class EnemySpawner : MonoBehaviour
 
     void Start()
     {
+        // Tamaño de la oleada al azar (el límite superior de Random.Range es exclusivo)
+        int low = Mathf.Min(minEnemies, maxEnemies);
+        int high = Mathf.Max(minEnemies, maxEnemies);
+        enemiesToSpawn = Random.Range(low, high + 1);
+
         // El primer enemigo aparece de inmediato
         timer = spawnInterval;
 
@@ -36,7 +43,7 @@ public class EnemySpawner : MonoBehaviour
     {
         if (finished || enemyPrefab == null) return;
 
-        // Fase 1: ir generando enemigos
+        // Fase 1: ir generando la oleada
         if (spawnedCount < enemiesToSpawn)
         {
             timer += Time.deltaTime;

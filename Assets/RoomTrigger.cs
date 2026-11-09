@@ -1,6 +1,11 @@
 using UnityEngine;
 
 public class RoomTrigger : MonoBehaviour {
+    // Margen por lado entre las paredes y el área que activa la sala.
+    // Debe ser mayor que la mitad del ancho del jugador (3 / 2) + el grosor de la puerta,
+    // para que las puertas no se cierren encima del jugador mientras cruza el pasillo.
+    public float triggerMargin = 4f;
+
     private Room roomScript;
     private EnemySpawner enemySpawner;
     private bool eventTriggered = false;
@@ -20,8 +25,10 @@ public class RoomTrigger : MonoBehaviour {
         BoxCollider2D triggerCol = GetComponent<BoxCollider2D>();
         RoomBoundsDetector detector = GetComponentInParent<RoomBoundsDetector>();
         if (triggerCol != null && detector != null) {
-            // Un poco más pequeño que el total para que detecte al entrar al área jugable
-            triggerCol.size = new Vector2(detector.roomWidth - 4f, detector.roomHeight - 4f);
+            // Más pequeño que la sala: solo se activa cuando el jugador ya está bien adentro
+            triggerCol.size = new Vector2(
+                detector.roomWidth - triggerMargin * 2f,
+                detector.roomHeight - triggerMargin * 2f);
         }
     }
 
