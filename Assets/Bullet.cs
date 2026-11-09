@@ -11,6 +11,10 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // Ignoramos cualquier trigger (RoomTrigger, otras balas, etc.).
+        // Sin esto, la bala se destruye al nacer dentro del área del RoomTrigger.
+        if (collision.isTrigger) return;
+
         // Si choca contra el jugador, ignoramos el choque
         if (collision.CompareTag("Player")) return;
 
@@ -21,7 +25,7 @@ public class Bullet : MonoBehaviour
             Destroy(collision.gameObject);
         }
 
-        // Destruimos la bala al impactar con cualquier obstáculo o enemigo
+        // Destruimos la bala al impactar con paredes, puertas o enemigos
         Destroy(gameObject);
     }
 }

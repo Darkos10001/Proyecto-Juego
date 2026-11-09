@@ -12,29 +12,25 @@ public class Room : MonoBehaviour {
     [HideInInspector] public bool playerInside = false;
 
     void Start() {
-        // Al crear la sala, las puertas inician abiertas (desactivadas) para dejar pasar al jugador
-        if (doorTop != null) doorTop.SetActive(false);
-        if (doorBottom != null) doorBottom.SetActive(false);
-        if (doorLeft != null) doorLeft.SetActive(false);
-        if (doorRight != null) doorRight.SetActive(false);
+        // Al iniciar la sala, las puertas se abren (desactivan) para dejar pasar al jugador
+        SetDoorsActive(false);
     }
 
     public void LockDoors() {
-        if (doorTop != null) doorTop.SetActive(true);
-        if (doorBottom != null) doorBottom.SetActive(true);
-        if (doorLeft != null) doorLeft.SetActive(true);
-        if (doorRight != null) doorRight.SetActive(true);
-        
-        Debug.Log($"[{gameObject.name}] Puertas bloqueadas.");
+        SetDoorsActive(true);
+        Debug.Log($"[{gameObject.name}] Puertas bloqueadas (Cerradas).");
     }
 
     public void UnlockDoors() {
-        if (doorTop != null) doorTop.SetActive(false);
-        if (doorBottom != null) doorBottom.SetActive(false);
-        if (doorLeft != null) doorLeft.SetActive(false);
-        if (doorRight != null) doorRight.SetActive(false);
-        
+        SetDoorsActive(false);
         isCleared = true;
         Debug.Log($"[{gameObject.name}] ¡Sala limpia! Puertas abiertas.");
+    }
+
+    private void SetDoorsActive(bool state) {
+        if (doorTop != null) doorTop.SetActive(state);
+        if (doorBottom != null) doorBottom.SetActive(state);
+        if (doorLeft != null) doorLeft.SetActive(state);
+        if (doorRight != null) doorRight.SetActive(state);
     }
 }

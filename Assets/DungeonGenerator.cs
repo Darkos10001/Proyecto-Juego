@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour {
     [Header("Prefab de la Sala")]
-    public GameObject roomPrefab;     
+    public GameObject roomPrefab;
 
     [Header("Configuración del Mapa")]
-    public int totalRooms = 10;        
+    public int totalRooms = 10;
 
     [Header("Tamaño de las Salas")]
-    public float roomWidth = 26f;     
-    public float roomHeight = 24f;    
+    public float roomWidth = 26f;
+    public float roomHeight = 24f;
 
     private List<Vector2> occupiedPositions = new List<Vector2>();
     private List<GameObject> spawnedRooms = new List<GameObject>();
@@ -30,7 +30,7 @@ public class DungeonGenerator : MonoBehaviour {
         for (int i = 0; i < totalRooms - 1; i++) {
             // Buscamos una sala existente en la lista para ramificar desde ella
             currentPos = occupiedPositions[Random.Range(0, occupiedPositions.Count)];
-            
+
             Vector2 nextPos = GetNextRandomPosition(currentPos);
 
             int attempts = 0;
@@ -50,7 +50,7 @@ public class DungeonGenerator : MonoBehaviour {
             safetyCounter++;
             if (safetyCounter > 500) break; // Prevenir bucles infinitos
         }
-        
+
         Debug.Log($"[DungeonGenerator] ¡Mazmorra generada con {occupiedPositions.Count} salas!");
     }
 
@@ -67,15 +67,17 @@ public class DungeonGenerator : MonoBehaviour {
     }
 
     void SpawnRoom(Vector2 position) {
-        if (roomPrefab != null) {
-            GameObject newRoom = Instantiate(roomPrefab, position, Quaternion.identity);
-            spawnedRooms.Add(newRoom);
-            
-            // Apagar los spawners de enemigos en las salas secundarias recién creadas
-            Transform spawner = newRoom.transform.Find("Spawner");
-            if (spawner != null && position != Vector2.zero) {
-                spawner.gameObject.SetActive(false);
-            }
+        if (roomPrefab == null) return;
+
+        GameObject newRoom = Instantiate(roomPrefab, position, Quaternion.identity);
+        spawnedRooms.Add(newRoom);
+
+        // La sala inicial nace "limpia" para no encerrar al jugador al empezar.
+        // Las demás nacen sin limpiar: su RoomTrigger se encarga del spawner y las puertas.
+        // (Así ya no depende del valor de isCleared guardado en el prefab.)
+        Room room = newRoom.GetComponent<Room>();
+        if (room != null) {
+            room.isCleared = (position == Vector2.zero);
         }
     }
 }

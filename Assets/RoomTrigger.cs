@@ -2,18 +2,18 @@ using UnityEngine;
 
 public class RoomTrigger : MonoBehaviour {
     private Room roomScript;
-    private GameObject enemySpawner;
+    private EnemySpawner enemySpawner;
     private bool eventTriggered = false;
 
     void Start() {
         // Obtenemos el script Room del objeto padre
         roomScript = GetComponentInParent<Room>();
 
-        // Buscamos y apagamos el spawner al inicio
+        // Buscamos el spawner hijo de la sala y lo apagamos al inicio
         Transform spawnerTransform = transform.parent.Find("Spawner");
         if (spawnerTransform != null) {
-            enemySpawner = spawnerTransform.gameObject;
-            enemySpawner.SetActive(false);
+            enemySpawner = spawnerTransform.GetComponent<EnemySpawner>();
+            spawnerTransform.gameObject.SetActive(false);
         }
 
         // Ajustamos automáticamente el tamaño del collider del trigger para que cubra la sala
@@ -26,26 +26,33 @@ public class RoomTrigger : MonoBehaviour {
     }
 
     void OnTriggerEnter2D(Collider2D collision) {
-        if (collision.CompareTag("Player") && !eventTriggered && roomScript != null && !roomScript.isCleared) {
-            eventTriggered = true;
-            roomScript.playerInside = true;
+        if (eventTriggered || roomScript == null || roomScript.isCleared) return;
+        if (!collision.CompareTag("Player")) return;
 
-            // 1. Cerrar puertas de esta sala
-            roomScript.LockDoors();
+        eventTriggered = true;
+        roomScript.playerInside = true;
 
-            // 2. Activar el spawner de enemigos
-            if (enemySpawner != null) {
-                enemySpawner.SetActive(true);
-            }
+        // Sala sin spawner: no hay nada que pelear, así que no la bloqueamos
+        if (enemySpawner == null) {
+            roomScript.UnlockDoors();
+            return;
         }
+
+        // 1. Cerrar puertas de esta sala
+        roomScript.LockDoors();
+
+        // 2. Avisarnos cuando el spawner termine y activarlo
+        enemySpawner.AllEnemiesDefeated += OnRoomCleared;
+        enemySpawner.gameObject.SetActive(true);
     }
 
-    void Update() {
-        if (roomScript != null && roomScript.playerInside && !roomScript.isCleared) {
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            if (enemies.Length == 0 && enemySpawner != null && !enemySpawner.activeSelf) {
-                roomScript.UnlockDoors();
-            }
-        }
+    void OnRoomCleared() {
+        enemySpawner.AllEnemiesDefeated -= OnRoomCleared;
+        roomScript.UnlockDoors();
+        enemySpawner.gameObject.SetActive(false);
+    }
+
+    void OnDestroy() {
+        if (enemySpawner != null) enemySpawner.AllEnemiesDefeated -= OnRoomCleared;
     }
 }
