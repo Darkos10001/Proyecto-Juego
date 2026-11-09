@@ -37,8 +37,10 @@ public class DungeonGenerator : MonoBehaviour {
             Debug.LogError("[DungeonGenerator] Falta asignar roomPrefab.");
             return;
         }
+        DisableLooseSpawners();
+
         if (enemyPrefab == null) {
-            Debug.LogWarning("[DungeonGenerator] Falta asignar enemyPrefab: las salas no tendrán enemigos.");
+            Debug.LogError("[DungeonGenerator] Falta asignar enemyPrefab en el Inspector: las salas no tendrán enemigos.");
         }
 
         GenerateLayout();
@@ -49,6 +51,24 @@ public class DungeonGenerator : MonoBehaviour {
         }
 
         Debug.Log($"[DungeonGenerator] ¡Mazmorra generada con {cells.Count} salas!");
+    }
+
+    // Un Spawner suelto en la escena (fuera de las salas) genera enemigos que no cuentan para abrir
+    // ninguna puerta. Lo apagamos y, si enemyPrefab quedó vacío, reutilizamos el enemigo que tenía.
+    void DisableLooseSpawners() {
+        EnemySpawner[] loose = FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None);
+        foreach (EnemySpawner s in loose) {
+            if (s.GetComponentInParent<Room>() != null) continue;
+
+            if (enemyPrefab == null && s.enemyPrefab != null) {
+                enemyPrefab = s.enemyPrefab;
+                Debug.LogWarning("[DungeonGenerator] enemyPrefab estaba vacío; usé el del Spawner suelto. " +
+                                 "Asígnalo en el Inspector y guarda la escena (Ctrl+S).");
+            }
+
+            Debug.LogWarning($"[DungeonGenerator] Apagué el Spawner suelto '{s.name}'. Puedes borrarlo de la escena.");
+            s.gameObject.SetActive(false);
+        }
     }
 
     void GenerateLayout() {

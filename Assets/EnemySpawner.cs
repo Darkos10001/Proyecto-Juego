@@ -31,6 +31,7 @@ public class EnemySpawner : MonoBehaviour
         int low = Mathf.Min(minEnemies, maxEnemies);
         int high = Mathf.Max(minEnemies, maxEnemies);
         enemiesToSpawn = Random.Range(low, high + 1);
+        Debug.Log($"[EnemySpawner] {transform.parent?.name}: oleada de {enemiesToSpawn} enemigos.");
 
         // El primer enemigo aparece de inmediato
         timer = spawnInterval;
@@ -41,7 +42,17 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
-        if (finished || enemyPrefab == null) return;
+        if (finished) return;
+
+        // Sin prefab no hay nada que generar: avisamos y damos la sala por limpia
+        // para que el jugador no quede encerrado para siempre.
+        if (enemyPrefab == null)
+        {
+            Debug.LogError("[EnemySpawner] Falta enemyPrefab: asígnalo en DungeonGenerator. Se abre la sala sin enemigos.", this);
+            finished = true;
+            AllEnemiesDefeated?.Invoke();
+            return;
+        }
 
         // Fase 1: ir generando la oleada
         if (spawnedCount < enemiesToSpawn)
@@ -60,6 +71,7 @@ public class EnemySpawner : MonoBehaviour
         if (spawned.Count == 0)
         {
             finished = true;
+            Debug.Log($"[EnemySpawner] {transform.parent?.name}: todos los enemigos eliminados.");
             AllEnemiesDefeated?.Invoke();
         }
     }
