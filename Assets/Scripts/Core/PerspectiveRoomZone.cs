@@ -2,38 +2,37 @@ using UnityEngine;
 
 /// <summary>
 /// Zona persistente de una sala especial.
-/// - El trigger 2D detecta la entrada desde la exploración 2D y activa 3D.
-/// - El trigger 3D detecta la salida de la sala y restaura 2D.
-///
-/// Este objeto debe permanecer activo y fuera de las raíces World2D/World3D.
+/// El trigger 2D detecta la entrada desde la exploración 2D y activa 3D.
+/// El trigger 3D detecta la salida de la sala y restaura 2D.
+/// Este objeto debe permanecer activo fuera de World2D y World3D.
 /// </summary>
-[RequireComponent(typeof(Collider2D))]
-[RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(BoxCollider))]
 public sealed class PerspectiveRoomZone : MonoBehaviour
 {
     [Header("Referencias")]
     [SerializeField] private PerspectiveSwitcher perspectiveSwitcher;
-    [Tooltip("Transform raíz del jugador. Puede ser el objeto que contiene Rigidbody2D/CharacterController.")]
+    [Tooltip("Transform raíz del jugador, que contiene sus colliders/controladores.")]
     [SerializeField] private Transform playerRoot;
 
-    [Header("Opciones")]
-    [Tooltip("Perspectiva que se activa al entrar desde el mundo 2D.")]
+    [Header("Perspectivas")]
     [SerializeField] private GamePerspective perspectiveInsideRoom = GamePerspective.ThreeD;
-    [Tooltip("Perspectiva que se restaura al salir del volumen 3D.")]
     [SerializeField] private GamePerspective perspectiveOutsideRoom = GamePerspective.TwoD;
 
-    private Collider2D entryTrigger2D;
-    private Collider exitTrigger3D;
+    private BoxCollider2D entryTrigger2D;
+    private BoxCollider exitTrigger3D;
 
     private void Awake()
     {
-        entryTrigger2D = GetComponent<Collider2D>();
-        exitTrigger3D = GetComponent<Collider>();
+        entryTrigger2D = GetComponent<BoxCollider2D>();
+        exitTrigger3D = GetComponent<BoxCollider>();
 
         entryTrigger2D.isTrigger = true;
         exitTrigger3D.isTrigger = true;
     }
 
+    // Solo se procesa la ENTRADA 2D. No se procesa OnTriggerExit2D porque
+    // el mundo 2D se apaga al entrar y ese apagado no debe restaurar el modo 2D.
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!IsPlayer(other.transform))
@@ -46,6 +45,8 @@ public sealed class PerspectiveRoomZone : MonoBehaviour
         }
     }
 
+    // Este collider 3D permanece activo durante todo el modo 3D.
+    // Al abandonar el volumen de la sala se vuelve a la perspectiva 2D.
     private void OnTriggerExit(Collider other)
     {
         if (!IsPlayer(other.transform))
@@ -73,7 +74,7 @@ public sealed class PerspectiveRoomZone : MonoBehaviour
         if (perspectiveInsideRoom == perspectiveOutsideRoom)
         {
             Debug.LogWarning(
-                "[PerspectiveRoomZone] La perspectiva interior y exterior deben ser diferentes.",
+                "[PerspectiveRoomZone] Las perspectivas interior y exterior deben ser diferentes.",
                 this);
         }
     }
