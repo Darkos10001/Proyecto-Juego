@@ -289,6 +289,7 @@ GameObject:
   - component: {fileID: 1607422596222605284}
   - component: {fileID: 2235518833505490775}
   - component: {fileID: 1717245790776700451}
+  - component: {fileID: 5046806187948154003}
   m_Layer: 0
   m_Name: RoomTrigger
   m_TagString: Untagged
@@ -369,6 +370,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e010715e4bf9b4b4a905edf42588dddb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomTrigger
+  triggerMargin: 4
+--- !u!114 &5046806187948154003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4888093331996643794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1d25c825f1e04143afd0d10fb2b3e9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatRoomTrigger
 --- !u!1 &4907834298253051507
 GameObject:
   m_ObjectHideFlags: 0

@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 255970048}
   - component: {fileID: 255970049}
+  - component: {fileID: 255970050}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -165,6 +166,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   playerHealth: {fileID: 1453598352}
   healthText: {fileID: 571812350}
+--- !u!114 &255970050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 255970047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9d2107078781644b3c40cefc3ccb93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
+  roomPrefab: {fileID: 6781563581772064143, guid: b57bc8d86acef6d42b212e976690c5c7, type: 3}
+  enemyPrefab: {fileID: 1097445394389339224, guid: 459766f4a6e29684292edc815a4b0003, type: 3}
+  totalRooms: 10
+  roomWidth: 26
+  roomHeight: 24
+  doorWidth: 6
+  doorColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
+  minEnemies: 3
+  maxEnemies: 7
+  spawnInterval: 0.5
+  spawnMargin: 3
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -744,61 +768,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
   roomPrefab: {fileID: 6781563581772064143, guid: b57bc8d86acef6d42b212e976690c5c7, type: 3}
+  enemyPrefab: {fileID: 1097445394389339224, guid: 459766f4a6e29684292edc815a4b0003, type: 3}
   totalRooms: 50
   roomWidth: 26
   roomHeight: 24
---- !u!1 &1447636640
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1447636641}
-  - component: {fileID: 1447636642}
-  m_Layer: 0
-  m_Name: Spawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1447636641
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1447636640}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.22757, y: 4.64214, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1447636642
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1447636640}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0fc4b5edae008a2459cd455f46117e51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  enemyPrefab: {fileID: 1097445394389339224, guid: 459766f4a6e29684292edc815a4b0003, type: 3}
-  enemiesToSpawn: 5
-  spawnInterval: 3
-  minDistanceFromPlayer: 3
-  minX: -7
-  maxX: 7
-  minY: -3.5
-  maxY: 3.5
+  doorWidth: 6
+  doorColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
+  minEnemies: 3
+  maxEnemies: 7
+  spawnInterval: 0.5
+  spawnMargin: 3
 --- !u!1 &1453598345
 GameObject:
   m_ObjectHideFlags: 0
@@ -1124,7 +1103,6 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1453598349}
   - {fileID: 255970048}
-  - {fileID: 1447636641}
   - {fileID: 1675688191}
   - {fileID: 481510406}
   - {fileID: 967913563}
