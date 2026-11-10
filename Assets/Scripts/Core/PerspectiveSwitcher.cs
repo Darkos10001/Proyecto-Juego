@@ -2,23 +2,21 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Alterna entre las representaciones 2D y 3D de una misma partida.
-/// Coloca las dos versiones del escenario en la escena y configura sus
-/// puntos de entrada equivalentes en el Inspector.
+/// Activa una de las dos representaciones del mismo espacio de juego.
+/// Los cambios pueden solicitarse desde zonas de sala u otros sistemas.
 /// </summary>
 public sealed class PerspectiveSwitcher : MonoBehaviour
 {
     [Serializable]
     public sealed class PerspectiveSetup
     {
-        public GamePerspective perspective;
-        [Tooltip("Raíz del escenario de esta perspectiva. Puede quedar vacía si el escenario siempre está activo.")]
+        [Tooltip("Raíz del escenario de esta perspectiva. No debe contener al jugador ni al sistema de cambio.")]
         public GameObject worldRoot;
-        [Tooltip("Cámara que debe quedar activa en esta perspectiva.")]
+        [Tooltip("Cámara de esta perspectiva.")]
         public Camera perspectiveCamera;
-        [Tooltip("Punto equivalente donde aparecerá el jugador al entrar en esta perspectiva.")]
+        [Tooltip("Punto equivalente de aparición al entrar en esta perspectiva.")]
         public Transform playerEntryPoint;
-        [Tooltip("Controladores que deben estar habilitados en esta perspectiva.")]
+        [Tooltip("Controladores exclusivos de esta perspectiva.")]
         public Behaviour[] enabledBehaviours;
     }
 
@@ -31,14 +29,13 @@ public sealed class PerspectiveSwitcher : MonoBehaviour
     [SerializeField] private PerspectiveSetup threeD;
     [SerializeField] private GamePerspective startingPerspective = GamePerspective.TwoD;
 
-    [Header("Cambio de perspectiva")]
-    [SerializeField] private KeyCode switchKey = KeyCode.Tab;
-    [SerializeField] private bool allowKeyboardSwitch = true;
+    [Header("Depuración opcional")]
+    [SerializeField] private bool allowKeyboardSwitch = false;
+    [SerializeField] private KeyCode debugSwitchKey = KeyCode.Tab;
 
     public GamePerspective CurrentPerspective { get; private set; }
+    public bool IsInitialized { get; private set; }
     public event Action<GamePerspective> PerspectiveChanged;
-
-    private bool initialized;
 
     private void Start()
     {
@@ -49,12 +46,14 @@ public sealed class PerspectiveSwitcher : MonoBehaviour
         }
 
         ApplyPerspective(startingPerspective, false);
-        initialized = true;
+        IsInitialized = true;
     }
 
     private void Update()
     {
-        if (allowKeyboardSwitch && Input.GetKeyDown(switchKey))
+        // Solo para pruebas en Editor/PC. En Android el cambio se realiza
+        // mediante PerspectiveRoomZone, no mediante teclado.
+        if (allowKeyboardSwitch && Input.GetKeyDown(debugSwitchKey))
             TogglePerspective();
     }
 
@@ -67,9 +66,9 @@ public sealed class PerspectiveSwitcher : MonoBehaviour
 
     public void SetPerspective(GamePerspective nextPerspective)
     {
-        if (!initialized)
+        if (!IsInitialized)
         {
-            Debug.LogWarning("[PerspectiveSwitcher] El sistema todavía no está inicializado.", this);
+            Debug.LogWarning("[PerspectiveSwitcher] El sistema aún no está inicializado.", this);
             return;
         }
 
@@ -86,8 +85,7 @@ public sealed class PerspectiveSwitcher : MonoBehaviour
             ? GamePerspective.ThreeD
             : GamePerspective.TwoD);
 
-        // Desactivar primero los controladores y la cámara anteriores evita
-        // que ambos sistemas de entrada controlen al jugador simultáneamente.
+        // Apagar primero el controlador y la cámara anteriores evita entradas dobles.
         SetBehaviours(previous.enabledBehaviours, false);
         if (previous.perspectiveCamera != null)
             previous.perspectiveCamera.gameObject.SetActive(false);
@@ -142,27 +140,28 @@ public sealed class PerspectiveSwitcher : MonoBehaviour
             return false;
         }
 
-        if (twoD == null || threeD == null)
+        if (twoD == null || threeD == null ||
+            twoD.perspectiveCamera == null || threeD.perspectiveCamera == null)
         {
-            Debug.LogError("[PerspectiveSwitcher] Configura los dos modos en el Inspector.", this);
-            return false;
-        }
-
-        if (twoD.perspectiveCamera == null || threeD.perspectiveCamera == null)
-        {
-            Debug.LogError("[PerspectiveSwitcher] Asigna una cámara para cada perspectiva.", this);
+            Debug.LogError("[PerspectiveSwitcher] Asigna las dos configuraciones y sus cámaras.", this);
             return false;
         }
 
         if (twoD.playerEntryPoint == null || threeD.playerEntryPoint == null)
         {
-            Debug.LogError("[PerspectiveSwitcher] Asigna los puntos de entrada 2D y 3D.", this);
+            Debug.LogError("[PerspectiveSwitcher] Asigna ambos puntos de entrada del jugador.", this);
             return false;
         }
 
         if (twoD.perspectiveCamera == threeD.perspectiveCamera)
         {
             Debug.LogError("[PerspectiveSwitcher] Cada perspectiva necesita su propia cámara.", this);
+            return false;
+        }
+
+        if (twoD.worldRoot != null && twoD.worldRoot == threeD.worldRoot)
+        {
+            Debug.LogError("[PerspectiveSwitcher] Las raíces 2D y 3D deben ser objetos diferentes.", this);
             return false;
         }
 
