@@ -883,7 +883,7 @@ Transform:
   m_GameObject: {fileID: 1435964158}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.9, y: 2, z: -2.6}
+  m_LocalPosition: {x: -0.9, y: 0, z: -2.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -904,7 +904,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonController
   cameraTransform: {fileID: 0}
   moveSpeed: 5
-  gravity: 0
+  sprintSpeed: 8
+  gravity: -20
+  maxStamina: 5
+  staminaDrainPerSecond: 1
+  staminaRecoveryPerSecond: 1.5
+  recoveryDelay: 1
   jumpHeight: 4
   lookSensitivity: 2
   minPitch: -80
@@ -1020,7 +1025,7 @@ Transform:
   m_GameObject: {fileID: 1819103751}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1042,6 +1047,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 473b6af8e1c68184c9d72e4d43bfb2fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AlignWallsToPlane
+  wallTop: {fileID: 0}
+  wallBottom: {fileID: 0}
+  wallLeft: {fileID: 0}
+  wallRight: {fileID: 0}
+  planeRenderer: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

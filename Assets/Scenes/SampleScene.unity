@@ -744,9 +744,100 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
   roomPrefab: {fileID: 6781563581772064143, guid: b57bc8d86acef6d42b212e976690c5c7, type: 3}
+  enemyPrefab: {fileID: 0}
   totalRooms: 50
   roomWidth: 26
   roomHeight: 24
+  doorWidth: 6
+  doorColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
+  minEnemies: 3
+  maxEnemies: 7
+  spawnInterval: 0.5
+  spawnMargin: 3
+--- !u!1001 &1018736873
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4584539049053922872, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_Name
+      value: Barril
+      objectReference: {fileID: 0}
+    - target: {fileID: 4584539049053922872, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 9.0882
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.15839
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358062255683081024, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4584539049053922872, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1441311762}
+  m_SourcePrefab: {fileID: 100100000, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+--- !u!1 &1441311757 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4584539049053922872, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+  m_PrefabInstance: {fileID: 1018736873}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1441311762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441311757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c496b94cd5e62ab4cbc8d66d33e2d856, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BarrelExplosion
+  explosionRadius: 3
+  explosionDamage: 2
+  explosionEffect: {fileID: 7426980159199381432, guid: 15fed9a9f15907c4c85c748510ceb887, type: 3}
 --- !u!1 &1447636640
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,7 +883,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   enemyPrefab: {fileID: 1097445394389339224, guid: 459766f4a6e29684292edc815a4b0003, type: 3}
-  enemiesToSpawn: 5
+  minEnemies: 3
+  maxEnemies: 7
   spawnInterval: 3
   minDistanceFromPlayer: 3
   minX: -7
@@ -1128,3 +1220,4 @@ SceneRoots:
   - {fileID: 1675688191}
   - {fileID: 481510406}
   - {fileID: 967913563}
+  - {fileID: 1018736873}

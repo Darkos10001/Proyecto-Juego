@@ -369,6 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e010715e4bf9b4b4a905edf42588dddb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomTrigger
+  triggerMargin: 4
 --- !u!1 &4907834298253051507
 GameObject:
   m_ObjectHideFlags: 0
@@ -936,6 +937,7 @@ GameObject:
   - component: {fileID: 7532944694155832153}
   - component: {fileID: 456584687830401922}
   - component: {fileID: 3241367955335795970}
+  - component: {fileID: 2261237041454222528}
   m_Layer: 0
   m_Name: Room_Base
   m_TagString: Untagged
@@ -999,6 +1001,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoomBoundsDetector
   roomWidth: 26
   roomHeight: 24
+--- !u!114 &2261237041454222528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6781563581772064143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4da3c10e198b3684e964402a263be9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomDecorationSpawner
+  permanentPrefabs: []
+  minPermanent: 1
+  maxPermanent: 3
+  destructiblePrefabs:
+  - {fileID: 4584539049053922872, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}
+  minDestructible: 1
+  maxDestructible: 3
+  wallMargin: 4
+  centerClearRadius: 3.5
+  placementRadius: 1.5
+  minDistanceBetweenObjects: 2.5
+  maxAttempts: 30
 --- !u!1 &8658698577711810571
 GameObject:
   m_ObjectHideFlags: 0
