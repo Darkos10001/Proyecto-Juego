@@ -1,101 +1,255 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [Header("Prefabs de enemigos")]
     public GameObject enemyPrefab;
+    public GameObject powerfulEnemyPrefab;
 
-    [Header("Oleada aleatoria")]
-    public int minEnemies = 3;               // Mínimo de enemigos de la oleada
-    public int maxEnemies = 7;               // Máximo de enemigos de la oleada (incluido)
-    public float spawnInterval = 0.5f;       // Segundos entre enemigo y enemigo
-    public float minDistanceFromPlayer = 3f; // Para que no aparezcan encima del jugador
+    [Header("Probabilidad de enemigos poderosos")]
+    [Range(0f, 100f)]
+    public float powerfulEnemyChance = 20f;
 
-    [Header("Área de aparición (RELATIVA a la posición de este objeto)")]
-    public float minX = -7f, maxX = 7f;
-    public float minY = -3.5f, maxY = 3.5f;
+    [Header("Cantidad de enemigos")]
+    public int minEnemies = 3;
+    public int maxEnemies = 7;
 
-    // Se dispara una sola vez, cuando ya aparecieron todos y todos fueron eliminados
+    [Header("Tiempo de aparicion")]
+    public float spawnInterval = 0.5f;
+
+    [Header("Distancia del jugador")]
+    public float minDistanceFromPlayer = 3f;
+
+    [Header("Limites de la sala")]
+    public float minX = -7f;
+    public float maxX = 7f;
+    public float minY = -3.5f;
+    public float maxY = 3.5f;
+
+    [Header("Evitar obstaculos")]
+    public float spawnCheckRadius = 0.8f;
+    public int maxSpawnAttempts = 30;
+
     public event System.Action AllEnemiesDefeated;
 
-    private readonly List<GameObject> spawned = new List<GameObject>();
+    private readonly List<GameObject> spawnedEnemies =
+        new List<GameObject>();
+
     private int enemiesToSpawn;
     private int spawnedCount;
-    private float timer;
+
+    private float spawnTimer;
     private bool finished;
+
     private Transform player;
 
     void Start()
     {
-        // Tamaño de la oleada al azar (el límite superior de Random.Range es exclusivo)
-        int low = Mathf.Min(minEnemies, maxEnemies);
-        int high = Mathf.Max(minEnemies, maxEnemies);
-        enemiesToSpawn = Random.Range(low, high + 1);
-        Debug.Log($"[EnemySpawner] {transform.parent?.name}: oleada de {enemiesToSpawn} enemigos.");
+        enemiesToSpawn = Random.Range(
+            Mathf.Max(1, minEnemies),
+            Mathf.Max(minEnemies, maxEnemies) + 1
+        );
 
-        // El primer enemigo aparece de inmediato
-        timer = spawnInterval;
+        spawnTimer = 0f;
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null) player = playerObj.transform;
+        GameObject playerObject =
+            GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObject != null)
+        {
+            player = playerObject.transform;
+        }
+
+        if (enemyPrefab == null)
+        {
+            Debug.LogError(
+                "[EnemySpawner] No hay Enemy Prefab asignado."
+            );
+
+            FinishWave();
+            return;
+        }
+
+        Debug.Log(
+            "[EnemySpawner] Oleada iniciada. Enemigos: " +
+            enemiesToSpawn
+        );
     }
 
     void Update()
     {
-        if (finished) return;
-
-        // Sin prefab no hay nada que generar: avisamos y damos la sala por limpia
-        // para que el jugador no quede encerrado para siempre.
-        if (enemyPrefab == null)
-        {
-            Debug.LogError("[EnemySpawner] Falta enemyPrefab: asígnalo en DungeonGenerator. Se abre la sala sin enemigos.", this);
-            finished = true;
-            AllEnemiesDefeated?.Invoke();
+        if (finished)
             return;
-        }
 
-        // Fase 1: ir generando la oleada
+        spawnedEnemies.RemoveAll(enemy => enemy == null);
+
+        // Generar solamente la cantidad establecida
         if (spawnedCount < enemiesToSpawn)
         {
-            timer += Time.deltaTime;
-            if (timer >= spawnInterval)
+            spawnTimer -= Time.deltaTime;
+
+            if (spawnTimer <= 0f)
             {
-                timer = 0f;
-                SpawnEnemy();
+                bool success = SpawnEnemy();
+
+                if (success)
+                {
+                    spawnedCount++;
+                    spawnTimer = spawnInterval;
+                }
+                else
+                {
+                    // Reintentar si no se encontro espacio
+                    spawnTimer = 0.5f;
+                }
             }
+        }
+
+        // Terminar cuando todos hayan aparecido y sido derrotados
+        if (spawnedCount >= enemiesToSpawn &&
+            spawnedEnemies.Count == 0)
+        {
+            FinishWave();
+        }
+    }
+
+    bool SpawnEnemy()
+    {
+        if (enemyPrefab == null)
+            return false;
+
+        Vector2 spawnPosition;
+
+        if (!TryGetSpawnPosition(out spawnPosition))
+        {
+            Debug.LogWarning(
+                "[EnemySpawner] No se encontro espacio libre."
+            );
+
+            return false;
+        }
+
+        GameObject selectedPrefab = enemyPrefab;
+
+        if (powerfulEnemyPrefab != null &&
+            Random.Range(0f, 100f) < powerfulEnemyChance)
+        {
+            selectedPrefab = powerfulEnemyPrefab;
+        }
+
+        GameObject enemy = Instantiate(
+            selectedPrefab,
+            spawnPosition,
+            Quaternion.identity
+        );
+
+        spawnedEnemies.Add(enemy);
+
+        Debug.Log(
+            "[EnemySpawner] Aparecio " +
+            selectedPrefab.name +
+            " (" + spawnedCount + 1 +
+            "/" + enemiesToSpawn + ")"
+        );
+
+        return true;
+    }
+
+    bool TryGetSpawnPosition(out Vector2 validPosition)
+    {
+        validPosition = Vector2.zero;
+
+        for (int attempt = 0;
+             attempt < maxSpawnAttempts;
+             attempt++)
+        {
+            Vector2 candidate =
+                (Vector2)transform.position +
+                new Vector2(
+                    Random.Range(minX, maxX),
+                    Random.Range(minY, maxY)
+                );
+
+            if (player != null)
+            {
+                float distance = Vector2.Distance(
+                    candidate,
+                    player.position
+                );
+
+                if (distance < minDistanceFromPlayer)
+                    continue;
+            }
+
+            if (!IsSpawnPositionFree(candidate))
+                continue;
+
+            validPosition = candidate;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool IsSpawnPositionFree(Vector2 position)
+    {
+        Collider2D[] overlaps =
+            Physics2D.OverlapCircleAll(
+                position,
+                spawnCheckRadius
+            );
+
+        foreach (Collider2D col in overlaps)
+        {
+            if (col == null || col.isTrigger)
+                continue;
+
+            return false;
+        }
+
+        return true;
+    }
+
+    void FinishWave()
+    {
+        if (finished)
             return;
-        }
 
-        // Fase 2: ya aparecieron todos; esperar a que mueran
-        spawned.RemoveAll(e => e == null); // un enemigo destruido cuenta como null en Unity
-        if (spawned.Count == 0)
-        {
-            finished = true;
-            Debug.Log($"[EnemySpawner] {transform.parent?.name}: todos los enemigos eliminados.");
-            AllEnemiesDefeated?.Invoke();
-        }
+        finished = true;
+
+        Debug.Log(
+            "[EnemySpawner] Oleada completada. Sala despejada."
+        );
+
+        AllEnemiesDefeated?.Invoke();
     }
 
-    void SpawnEnemy()
+    private void OnDrawGizmosSelected()
     {
-        GameObject enemy = Instantiate(enemyPrefab, GetSpawnPosition(), Quaternion.identity);
-        spawned.Add(enemy);
-        spawnedCount++;
-    }
+        Gizmos.color = Color.yellow;
 
-    Vector2 GetSpawnPosition()
-    {
-        Vector2 pos = transform.position;
+        Vector3 center = transform.position +
+            new Vector3(
+                (minX + maxX) / 2f,
+                (minY + maxY) / 2f,
+                0f
+            );
 
-        // Hasta 10 intentos para encontrar un punto lejos del jugador
-        for (int i = 0; i < 10; i++)
-        {
-            Vector2 offset = new Vector2(Random.Range(minX, maxX), Random.Range(minY, maxY));
-            pos = (Vector2)transform.position + offset;
+        Vector3 size = new Vector3(
+            maxX - minX,
+            maxY - minY,
+            0f
+        );
 
-            if (player == null || Vector2.Distance(pos, player.position) >= minDistanceFromPlayer)
-                return pos;
-        }
-        return pos;
+        Gizmos.DrawWireCube(center, size);
+
+        Gizmos.color = Color.red;
+
+        Gizmos.DrawWireSphere(
+            transform.position,
+            spawnCheckRadius
+        );
     }
 }

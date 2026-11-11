@@ -1013,8 +1013,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4da3c10e198b3684e964402a263be9f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomDecorationSpawner
-  permanentPrefabs: []
-  minPermanent: 1
+  permanentPrefabs:
+  - {fileID: 1622377220172090067, guid: 1ffb713b39bb7e84eb318fac8d8906d9, type: 3}
+  minPermanent: 3
   maxPermanent: 3
   destructiblePrefabs:
   - {fileID: 4584539049053922872, guid: 081319da1fac27641b82422ff17cfb5b, type: 3}

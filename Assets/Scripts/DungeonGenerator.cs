@@ -7,6 +7,7 @@ public class DungeonGenerator : MonoBehaviour
     [Header("Prefabs")]
     public GameObject roomPrefab;
     public GameObject enemyPrefab;
+    public GameObject powerfulEnemyPrefab;
 
     [Header("Configuracion del mapa")]
     public int totalRooms = 10;
@@ -46,7 +47,9 @@ public class DungeonGenerator : MonoBehaviour
     {
         if (roomPrefab == null)
         {
-            Debug.LogError("[DungeonGenerator] Falta roomPrefab.");
+            Debug.LogError(
+                "[DungeonGenerator] Falta asignar roomPrefab."
+            );
             return;
         }
 
@@ -54,7 +57,17 @@ public class DungeonGenerator : MonoBehaviour
 
         if (enemyPrefab == null)
         {
-            Debug.LogError("[DungeonGenerator] Falta enemyPrefab.");
+            Debug.LogError(
+                "[DungeonGenerator] Falta asignar enemyPrefab."
+            );
+        }
+
+        if (powerfulEnemyPrefab == null)
+        {
+            Debug.LogWarning(
+                "[DungeonGenerator] No hay enemigo poderoso asignado. " +
+                "Solo apareceran enemigos normales."
+            );
         }
 
         GenerateLayout();
@@ -65,7 +78,7 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         Debug.Log(
-            $"[DungeonGenerator] Mazmorra generada: {cells.Count} salas."
+            $"[DungeonGenerator] Mazmorra generada con {cells.Count} salas."
         );
     }
 
@@ -84,7 +97,8 @@ public class DungeonGenerator : MonoBehaviour
                 enemyPrefab = s.enemyPrefab;
 
                 Debug.LogWarning(
-                    "[DungeonGenerator] Se reutilizo el enemyPrefab del Spawner."
+                    "[DungeonGenerator] Se reutilizo el enemyPrefab " +
+                    "del Spawner suelto."
                 );
             }
 
@@ -102,7 +116,8 @@ public class DungeonGenerator : MonoBehaviour
 
         int safetyCounter = 0;
 
-        while (cells.Count < totalRooms && safetyCounter < 1000)
+        while (cells.Count < totalRooms &&
+               safetyCounter < 1000)
         {
             safetyCounter++;
 
@@ -123,13 +138,23 @@ public class DungeonGenerator : MonoBehaviour
 
     Vector2 GetPrefabCenterOffset()
     {
-        Transform l = roomPrefab.transform.Find("Wall_Left");
-        Transform r = roomPrefab.transform.Find("Wall_Right");
-        Transform t = roomPrefab.transform.Find("Wall_Top");
-        Transform b = roomPrefab.transform.Find("Wall_Bottom");
+        Transform l =
+            roomPrefab.transform.Find("Wall_Left");
 
-        if (l == null || r == null || t == null || b == null)
+        Transform r =
+            roomPrefab.transform.Find("Wall_Right");
+
+        Transform t =
+            roomPrefab.transform.Find("Wall_Top");
+
+        Transform b =
+            roomPrefab.transform.Find("Wall_Bottom");
+
+        if (l == null || r == null ||
+            t == null || b == null)
+        {
             return Vector2.zero;
+        }
 
         return new Vector2(
             (l.localPosition.x + r.localPosition.x) / 2f,
@@ -150,11 +175,13 @@ public class DungeonGenerator : MonoBehaviour
             Quaternion.identity
         );
 
-        newRoom.name = $"Room_{cell.x}_{cell.y}";
+        newRoom.name =
+            $"Room_{cell.x}_{cell.y}";
 
         spawnedRooms.Add(newRoom);
 
-        Room room = newRoom.GetComponent<Room>();
+        Room room =
+            newRoom.GetComponent<Room>();
 
         if (room == null)
         {
@@ -164,10 +191,24 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
 
-        bool isStartRoom = cell == Vector2Int.zero;
+        bool isStartRoom =
+            cell == Vector2Int.zero;
 
         room.isCleared = isStartRoom;
 
+        // SALA INICIAL: NO DEBE GENERAR ENEMIGOS
+        if (isStartRoom)
+        {
+            Transform startSpawner =
+                newRoom.transform.Find("Spawner");
+
+            if (startSpawner != null)
+            {
+                startSpawner.gameObject.SetActive(false);
+            }
+        }
+
+        // CREAR PUERTAS SEGUN LAS HABITACIONES VECINAS
         room.BuildDoorways(
             occupied.Contains(cell + Vector2Int.up),
             occupied.Contains(cell + Vector2Int.down),
@@ -177,6 +218,7 @@ public class DungeonGenerator : MonoBehaviour
             doorColor
         );
 
+        // CONFIGURAR SPAWNER EN LAS DEMAS SALAS
         if (!isStartRoom)
         {
             SetupSpawner(newRoom, center);
@@ -194,6 +236,7 @@ public class DungeonGenerator : MonoBehaviour
             );
         }
 
+        // COMPROBAR DIMENSIONES
         RoomBoundsDetector bounds =
             newRoom.GetComponent<RoomBoundsDetector>();
 
@@ -204,13 +247,17 @@ public class DungeonGenerator : MonoBehaviour
             Debug.LogWarning(
                 $"[DungeonGenerator] El prefab mide " +
                 $"{bounds.roomWidth}x{bounds.roomHeight}, " +
-                $"pero se configuraron {roomWidth}x{roomHeight}."
+                $"pero roomWidth/roomHeight valen " +
+                $"{roomWidth}x{roomHeight}."
             );
         }
     }
 
-    void SetupSpawner(GameObject newRoom, Vector2 worldCenter)
+    void SetupSpawner(
+        GameObject newRoom,
+        Vector2 worldCenter)
     {
+        // BUSCAR O CREAR SPAWNER
         Transform spawnerTransform =
             newRoom.transform.Find("Spawner");
 
@@ -223,43 +270,57 @@ public class DungeonGenerator : MonoBehaviour
         else
         {
             spawnerObj = new GameObject("Spawner");
-            spawnerObj.transform.SetParent(newRoom.transform);
+
+            spawnerObj.transform.SetParent(
+                newRoom.transform
+            );
         }
 
-        spawnerObj.transform.position = worldCenter;
+        spawnerObj.transform.position =
+            worldCenter;
 
         EnemySpawner spawner =
             spawnerObj.GetComponent<EnemySpawner>();
 
         if (spawner == null)
         {
-            spawner = spawnerObj.AddComponent<EnemySpawner>();
+            spawner =
+                spawnerObj.AddComponent<EnemySpawner>();
         }
 
-        if (spawner.enemyPrefab == null)
-        {
-            spawner.enemyPrefab = enemyPrefab;
-        }
+        // ASIGNAR ENEMIGOS
+        spawner.enemyPrefab = enemyPrefab;
+        spawner.powerfulEnemyPrefab =
+            powerfulEnemyPrefab;
 
+        // CONFIGURAR OLEADAS
         spawner.minEnemies = minEnemies;
         spawner.maxEnemies = maxEnemies;
         spawner.spawnInterval = spawnInterval;
 
+        // CALCULAR LIMITES DE APARICION
         RoomBoundsDetector bounds =
             newRoom.GetComponent<RoomBoundsDetector>();
 
-        float w = bounds != null ? bounds.roomWidth : roomWidth;
-        float h = bounds != null ? bounds.roomHeight : roomHeight;
+        float w =
+            bounds != null ? bounds.roomWidth : roomWidth;
 
-        float halfW = Mathf.Max(1f, w / 2f - spawnMargin);
-        float halfH = Mathf.Max(1f, h / 2f - spawnMargin);
+        float h =
+            bounds != null ? bounds.roomHeight : roomHeight;
+
+        float halfW =
+            Mathf.Max(1f, w / 2f - spawnMargin);
+
+        float halfH =
+            Mathf.Max(1f, h / 2f - spawnMargin);
 
         spawner.minX = -halfW;
         spawner.maxX = halfW;
+
         spawner.minY = -halfH;
         spawner.maxY = halfH;
 
-        // Se activa cuando el jugador entra en la sala
+        // DESACTIVAR HASTA QUE ENTRE EL JUGADOR
         spawnerObj.SetActive(false);
     }
 }
